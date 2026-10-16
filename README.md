@@ -1,5 +1,7 @@
 # Tabelle nach Siegen: sie misst das Feld, nicht die Stärke – Streamlit-Demo
 
+**[→ Demo live ausprobieren](https://sebastianhanisch-siegtabelle-demo.streamlit.app/)**
+
 Wurzel der **Ranking-Linie** (Konzepte-Demo): Aus Paarvergleichen eine Rangfolge schätzen. Das Vehikel ist ein **neutrales, simuliertes Turnier**
 mit bekannter Stärke je Teilnehmer, damit sich der Fehler jedes Verfahrens messen lässt. Dieses Stück fragt nur: Was misst die **Tabelle nach
 Siegen**, wo ist sie gut und wo wird sie leise falsch? Alles ist simuliert, es gibt keinen echten Datensatz.
@@ -121,4 +123,4 @@ Gebaut mit Streamlit, Plotly, numpy, pandas und fpdf2.
 
 ---
 
-Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – Operations Research und Machine Learning ([Über mich](https://sebastianhanisch.net/ueber-mich.html)). Mehr zu den Demos: [Interaktive Demos](https://sebastianhanisch.net/demos.html).
+Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – Operations Research und Machine Learning ([Über mich](https://sebastianhanisch.net/ueber-mich.html)). Mehr zur Reihe: [Ranking: von der Siegtabelle bis Learning to Rank](https://sebastianhanisch.net/konzepte-ranking.html).
