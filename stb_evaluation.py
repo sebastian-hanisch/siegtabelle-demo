@@ -165,7 +165,7 @@ def verdict_best_case(rows) -> tuple[str, str]:
     lo, hi = rows[0], rows[-1]
     return "info", (f"Bei vollständigem, ausgeglichenem Plan steht der Stärkste mit {lo['k']} Partie je Paar in nur {pct(lo['top'])} % der Läufe auf "
                     f"Platz 1 (τ = {de(lo['tau'])}), mit {hi['k']} Partien in {pct(hi['top'])} % (τ = {de(hi['tau'])}). Das ist Rauschen und kein "
-                    "Verfahrensfehler: Mehr Partien beheben es, und die Ordnung nach Siegen ist hier dieselbe, die ein Bradley-Terry-Modell ergäbe.")
+                    "Verfahrensfehler: Mehr Partien beheben es, und die Ordnung nach Siegen ist hier dieselbe, die ein Bradley-Terry-Modell ergäbe (wo dessen Schätzer existiert).")
 
 
 def verdict_staffeln(rows) -> tuple[str, str]:

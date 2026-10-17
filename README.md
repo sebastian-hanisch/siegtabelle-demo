@@ -15,8 +15,8 @@ fehlen oder die Leistung vom Gegner abhängt, und nichts in der Tabelle verrät 
 ## Modell
 
 - n Teilnehmer mit Stärken sᵢ, äquidistant mit Abstand δ (Standard 0,3: der Stärkere gewinnt gegen den nächsten Nachbarn mit etwa 57 %).
-- Eine Partie i gegen j gewinnt i mit P = σ(sᵢ − sⱼ), optional plus eine zyklische Störung über drei Spielstile (Zuschlag c, auf 0,02 bis 0,98
-  begrenzt). Beobachtet werden nur Ausgänge, nie die Stärke.
+- Eine Partie i gegen j gewinnt i mit P = σ(sᵢ − sⱼ), optional plus eine zyklische Störung über drei Spielstile (Zuschlag c; mit Störung, also c > 0, auf
+  0,02 bis 0,98 begrenzt). Beobachtet werden nur Ausgänge, nie die Stärke.
 - **Zwei Zielgrößen:** die Generator-Stärke s und die **erwartete Siegquote** eᵢ gegen ein gleichverteiltes Feld. Ohne Zyklen ordnen beide gleich.
   Die Stärke ist eine **Konstruktion des Generators**, kein Messwert.
 - Drei Spielpläne: vollständig, zwei Staffeln (stark/schwach, dazu x Kreuzpartien), zufällige Lücken (jedes Paar mit Wahrscheinlichkeit p).
@@ -28,32 +28,37 @@ fehlen oder die Leistung vom Gegner abhängt, und nichts in der Tabelle verrät 
 - **Maße:** Kendall-τ gegen beide Zielgrößen, Platz des Stärksten, Gleichstandsanteil, Anteil der Paare, in denen der in der Tabelle Hintere den
   direkten Vergleich gewann, zyklische Dreiecke, Zahl der Teile des Spielplans.
 - **Experimente** über 200 feste Turniere (`SWEEP_SEEDS`, nie ein einzelner Seed): vier Experimente mit je einem live berechneten Verdikt.
-- **Zufall:** gemeinsamer Generator `turnier_generator.py` mit SplitMix64-Strom (Ergebnis hängt nur von Seed und Position ab, plattformunabhängig).
+- **Zufall:** gemeinsamer Generator `turnier_generator.py` mit SplitMix64-Strom (der Strom hängt nur von Seed und Position ab, plattformunabhängig; das Turnier ist bei gleichen Reglerwerten und gleichem Seed
+  dasselbe).
 
 ## Befunde (gemessen, keine Behauptungen)
 
-Alle Zahlen: 200 feste Turniere (`SWEEP_SEEDS`), Experiment 1 mit 8, die übrigen mit 12 Teilnehmern, Stärkeabstand 0,3.
+Alle Zahlen: 200 feste Turniere (`SWEEP_SEEDS`), Experiment 1 mit 8, die übrigen mit 12 Teilnehmern, Stärkeabstand 0,3. Es sind Werte
+einer festen Stichprobe: Anteile wie „Platz 1“ oder „zerfällt“ schwanken bei 200 Turnieren um einige Prozentpunkte (Stichprobenfehler bei
+Platz 1 etwa 2 bis 3,5 Punkte; mit 6000 anderen Seeds lag Experiment 1 bei einer Partie je Paar bei 43 %, bei 10 Partien bei 78 %).
 
 | Frage | Befund | Test |
 |---|---|---|
-| Wie gut ist die Tabelle im besten Fall (vollständig, ausgeglichen)? | Mit einer Partie je Paar steht der Stärkste nur in 40,5 % der Läufe auf Platz 1 (τ = 0,53); mit 4 Partien in 64,5 % (0,78), mit 10 Partien in 74,5 % (0,88), mit 40 Partien in 93 % (0,98). **Reines Rauschen**, kein Verfahrensfehler. | `test_one_game_per_pair_the_strongest_leads_in_less_than_half_of_the_runs`, `test_more_games_help_monotonically_and_forty_games_nearly_fix_it` |
-| Ist die Siege-Ordnung dort schon die Bradley-Terry-Ordnung? | **Ja**, wo der Schätzer existiert (alle auswertbaren Turniere in der Stichprobe). Bei einer Partie je Paar existiert er praktisch nie. | `test_wins_order_equals_bradley_terry_order_in_a_balanced_complete_tournament` |
+| Wie gut ist die Tabelle im besten Fall (vollständig, ausgeglichen)? | Mit einer Partie je Paar steht der Stärkste nur in etwa 40 % der Läufe auf Platz 1 (τ = 0,53); mit 4 Partien in etwa 65 % (0,78), mit 10 Partien in rund 75 % (0,88), mit 40 Partien in rund 93 % (0,98). **Reines Rauschen**, kein Verfahrensfehler. | `test_one_game_per_pair_the_strongest_leads_in_less_than_half_of_the_runs`, `test_more_games_help_monotonically_and_forty_games_nearly_fix_it` |
+| Ist die Siege-Ordnung dort schon die Bradley-Terry-Ordnung? | **Ja**, wo der Schätzer existiert (alle auswertbaren Turniere in der Stichprobe). Bei einer Partie je Paar existiert er in rund 40 % der Läufe nicht (ungeschlagene Teilnehmer oder Teilgruppen ohne Rückweg). | `test_wins_order_equals_bradley_terry_order_in_a_balanced_complete_tournament` |
 | Gleichstände | Bei einer Partie je Paar stehen 14 % aller Paare punktgleich, bei 40 Partien 0,2 %. | `test_ties_are_common_with_one_game_and_rare_with_forty` |
 | Zwei Staffeln ohne Kreuzpartien | 50 % der Paare über die Staffeln falsch geordnet (Münzwurf), der Plan hat zwei Teile; die Tabelle weist trotzdem Plätze 1 bis 12 aus. Mit einer Kreuzpartie je starkem Spieler 35 %, mit drei 16,5 %, wenn alle gegeneinander spielen 6 %. | `test_without_crossing_games_the_two_leagues_are_ordered_like_a_coin_flip`, `test_error_falls_with_every_crossing_game_but_never_reaches_zero` |
-| Fehlende Partien | Gewertet nach Siegquote ordnet die Tabelle bei p = 0,5 besser als nach Siegen (τ 0,58 gegen 0,50). Bei p = 0,33 zerfällt der Plan in 17 % der Läufe in Teile, bei p = 0,2 in 72 %. | `test_quote_beats_wins_when_games_are_missing`, `test_sparse_plans_fall_apart_and_the_contradiction_hides_it` |
+| Fehlende Partien | Gewertet nach Siegquote ordnet die Tabelle bei p = 0,5 besser als nach Siegen (τ 0,58 gegen 0,50). Bei p = 0,33 zerfällt der Plan in etwa 14 bis 17 % der Läufe in Teile, bei p = 0,2 in etwa 68 bis 72 % (Stichprobe: 17 % und 72 %; für zufällige Lücken bei 12 Teilnehmern ergibt die Rechnung 14,0 % und 67,7 %). | `test_quote_beats_wins_when_games_are_missing`, `test_sparse_plans_fall_apart_and_the_contradiction_hides_it` |
 | Verrät der Widerspruch zum direkten Vergleich die Lücken? | **Nein:** er sinkt von 17 % (vollständig) auf 7 % (p = 0,12), obwohl der Plan fast ganz zerfällt. | `test_sparse_plans_fall_apart_and_the_contradiction_hides_it` |
-| Zyklen bei ausgewogenen Stilen | Die Ordnung bleibt (τ 0,99 bei c = 0,4), obwohl 47 von 220 Dreiergruppen zyklisch sind und 28 % der gespielten Paare der Tabelle widersprechen. | `test_balanced_styles_leave_the_order_nearly_untouched_although_many_triples_cycle` |
+| Zyklen bei ausgewogenen Stilen | Die Ordnung bleibt (τ 0,99 bei c = 0,4), obwohl 47 von 220 Dreiergruppen zyklisch sind und 28 % der gespielten, nicht ausgeglichenen Paare mit verschiedener Wertung der Tabelle widersprechen (12 Teilnehmer, 50 Partien je Paar; „ausgewogen“ heißt gleich große Stilgruppen, also n durch 3 teilbar). | `test_balanced_styles_leave_the_order_nearly_untouched_although_many_triples_cycle` |
 | Zyklen bei unausgewogenen Stilen (der Stärkste wird von den meisten gekontert) | Bei c = 0,2 steht der Stärkste im Mittel auf Platz 3,3 (τ gegen die Stärke 0,74), bei c = 0,4 auf Platz 5,7 (τ 0,525); dabei widersprechen weniger als 5 % der direkten Vergleiche der Tabelle. | `test_countered_strongest_slides_down_but_expected_rate_is_hit` |
-| Trifft die Tabelle dann wenigstens die erwartete Siegquote? | **Ja**, in allen neun Konfigurationen: τ zwischen 0,97 und 0,99 (Konter-Stil bei c = 0,4: 0,97, wo es gegen die Stärke nur 0,525 sind). | `test_table_hits_expected_rate_in_every_configuration` |
+| Trifft die Tabelle dann wenigstens die erwartete Siegquote? | **Ja**, in allen neun Konfigurationen: τ zwischen 0,97 und 1,00 (Konter-Stil bei c = 0,4: 0,97, wo es gegen die Stärke nur 0,525 sind); drei der neun Konfigurationen haben c = 0, sechs haben Zyklen. | `test_table_hits_expected_rate_in_every_configuration` |
 | Dominiert der Beute-Stil? | Der Stärkste bleibt im Mittel auf Platz 1,0 (c = 0,2). | `test_prey_dominated_field_keeps_the_strongest_in_front` |
 
 ## Befunde und Korrekturen gegenüber dem Plan
 
-- **Skizze: „die Siegtabelle lügt“.** Gemessen ist das falsch: Bei vollständigem, ausgeglichenem Plan ist die Tabelle die Bradley-Terry-Ordnung
-  und ihr Fehler reines Rauschen. Titel und Kernbotschaft sind entsprechend geändert („sie misst das Feld, nicht die Stärke“).
-- **Skizze: „Zyklen verfälschen die Rangfolge“.** Gemessen nur, wenn das Feld unausgewogen ist (Stärkster gekontert). Ausgewogene Zyklen
-  verschieben die Ordnung kaum.
-- **Skizze: Widerspruch zum direkten Vergleich als Qualitätsanzeige.** Für Lücken ungeeignet (siehe oben), für ausgewogene Zyklen brauchbar.
+- **Skizze: „die Siegtabelle lügt“.** Gemessen ist das falsch: Bei vollständigem, ausgeglichenem Plan ist die Tabelle (wo der Schätzer existiert) die
+  Bradley-Terry-Ordnung und ihr Fehler reines Rauschen. Titel und Kernbotschaft sind entsprechend geändert („sie misst das Feld, nicht die Stärke“).
+- **Skizze: „Zyklen verfälschen die Rangfolge“.** Gemessen vor allem, wenn das Feld unausgewogen ist (Stärkster gekontert). Ausgewogene Zyklen
+  verschieben die Ordnung bei gleich großen Stilgruppen (n durch 3 teilbar, hier n = 12) kaum.
+- **Skizze: Widerspruch zum direkten Vergleich als Qualitätsanzeige.** Für Lücken ungeeignet (siehe oben); auch für Zyklen nur als Zyklenanzeige,
+  nicht als Qualitätsanzeige der Rangfolge brauchbar: Er ist bei ausgewogenen Zyklen hoch (28 %), obwohl die Ordnung stimmt, und beim gekonterten
+  Stärksten niedrig (unter 5 %), obwohl sie nicht stimmt.
 - **Zielgröße.** Unter Zyklen ist „wahre Stärke“ mehrdeutig; die Demo zeigt deshalb beide Größen. Die Tabelle trifft die erwartete Siegquote.
 
 ## Abgrenzung
@@ -67,8 +72,8 @@ Alle Zahlen: 200 feste Turniere (`SWEEP_SEEDS`), Experiment 1 mit 8, die übrige
 ## Ehrliche Grenzen
 
 - **Ein Generator:** Bradley-Terry-Stärke plus eine einfache additive Stil-Störung. Echte Turniere haben Remis, Heimvorteil, Form und Zeit.
-- **Zielgröße:** Die Generator-Stärke ist die transitive Komponente; die erwartete Siegquote ist eine zweite, ebenso vertretbare Wahl.
-- **Kleine Instanzen:** 8 und 12 Teilnehmer, ein Stärkeabstand; ab etwa 50 Teilnehmern ändert sich das Bild (Schweizer-System-Regime).
+- **Zielgröße:** Die Generator-Stärke ist der Bradley-Terry-Anteil des Generators (ohne Stilzuschlag); die erwartete Siegquote ist eine zweite, ebenso vertretbare Wahl.
+- **Kleine Instanzen:** 8 und 12 Teilnehmer, ein Stärkeabstand; für deutlich größere Felder (etwa 50 Teilnehmer, Schweizer-System-Regime) ist die Übertragbarkeit nicht gemessen.
 - **Alles simuliert:** Aussagen gelten für diesen Generator mit seinen Annahmen, nicht für reale Ranglisten.
 - **Experimente unabhängig vom Regler:** Experiment 1 rechnet mit 8, die Experimente 2 bis 4 mit 12 Teilnehmern.
 
@@ -85,7 +90,7 @@ Alle Zahlen: 200 feste Turniere (`SWEEP_SEEDS`), Experiment 1 mit 8, die übrige
 
 ## Tests
 
-91 Tests, rund 25 Sekunden: Einheiten gegen von Hand gerechnete Mini-Instanzen (`test_algorithm.py`), Generator (`test_generator.py`),
+133 Tests, rund 80 Sekunden: Einheiten gegen von Hand gerechnete Mini-Instanzen (`test_algorithm.py`), Generator (`test_generator.py`),
 **Orakel** (`test_oracle_siegtabelle.py`: zyklische Dreiecke gegen Aufzählung, Kendall-τ gegen `scipy`, Komponenten gegen `networkx`,
 Siege-Ordnung gegen Bradley-Terry per `scipy.optimize`, exakte Aufzählung für n = 3, Direktvergleich gegen Aufzählung, erwartete Siegquote),
 Presets, ausblendbare Regler (`test_hidden_widget_state.py`), alle Zahlen dieses README (`test_claims.py`) und AppTest-Rauchtests.

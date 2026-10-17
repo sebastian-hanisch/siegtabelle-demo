@@ -90,7 +90,7 @@ def test_style_assignment_modes():
     assert list(T.style_assignment(7, "ausgewogen", T.SplitMix64(1))) == [0, 1, 2, 0, 1, 2, 0]
     for mode, main, alt in (("konter", 1, 0), ("beute", 2, 1)):
         st = T.style_assignment(12, mode, T.SplitMix64(5))
-        assert st[11] == 0                                          # der Stärkste hat immer Stil 0
+        assert st[11] == 0                                          # bei Konter und Beute hat der Stärkste Stil 0
         assert (st == main).sum() == 8 and (st[:11] == alt).sum() == 3
     with pytest.raises(ValueError):
         T.style_assignment(8, "wild", T.SplitMix64(1))

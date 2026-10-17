@@ -68,7 +68,7 @@ st.markdown(
     """
 Wer gewinnt ein Turnier, wenn man nur Siege zählt? Diese Demo ist das **erste Stück der Ranking-Linie** und die **erste Demo der Reihe, die aus
 Paarvergleichen eine Rangfolge schätzt**. In einem **neutralen, simulierten Turnier** ist die wahre Stärke jedes Teilnehmers bekannt, sodass sich
-der Fehler der **Tabelle nach Siegen** messen lässt. Das Ergebnis ist differenzierter als „die Tabelle lügt“: Sie ist gut, wo jeder gegen jeden
+der Fehler der **Tabelle nach Siegen** messen lässt. Das Ergebnis ist differenzierter als „die Tabelle lügt“: Sie ist unverzerrt (nur verrauscht), wo jeder gegen jeden
 gleich oft spielt, und sie wird **leise** falsch, wenn Gegner ungleich sind, Partien fehlen oder die Leistung am Gegner hängt.
 
 Weiter unten: vier **🔬 Experimente** mit Verdikt, **🚧 Wo die Annahmen enden** und der Expander **📐 Mathematische Formulierung**.
@@ -79,8 +79,8 @@ with st.expander("So funktioniert eine Tabelle nach Siegen", expanded=True):
     st.markdown(
         """
 1. **Partien spielen:** Jedes Paar spielt so oft, wie der Spielplan es vorsieht. Eine Partie gewinnt der Stärkere nur mit einer Wahrscheinlichkeit
-   (je größer der Stärkeunterschied, desto wahrscheinlicher), nie sicher.
-2. **Siege zählen:** Die Tabelle ordnet nach der Zahl der Siege oder, wenn nicht alle gleich oft gespielt haben, nach der Siegquote.
+   (je größer der Stärkeunterschied, desto wahrscheinlicher; bei Abstand 0,3 und 12 Teilnehmern gewinnt der Erste gegen den Letzten nur mit etwa 96 %).
+2. **Siege zählen:** Die Tabelle ordnet nach der Zahl der Siege oder, wenn Sie es wählen, nach der Siegquote (sinnvoll, wenn nicht alle gleich oft gespielt haben).
 3. **Gleichstände auflösen:** erst durch den **Direktvergleich** unter den Punktgleichen, danach durch das **Los**.
 4. **Was sie misst:** den Erfolg gegen **die Gegner, die tatsächlich gespielt haben**. Ob das die Stärke ist, hängt vom Feld ab.
         """
@@ -122,7 +122,7 @@ with st.sidebar:
     if c > 0:       # ohne Zyklen gibt es keine Stile: der Regler wäre wirkungslos
         seed_widget("stil_select")
         stil = st.selectbox("Stilverteilung", list(C.STIL_LABELS), format_func=C.STIL_LABELS.get, key="stil_select",
-                            help="Wie die drei Spielstile verteilt sind. Der Stärkste hat immer Stil 0.")
+                            help="Wie die drei Spielstile verteilt sind. Bei Konter und Beute hat der Stärkste Stil 0; bei „ausgewogen“ sind die Stile reihum vergeben.")
         remember("stil_select", stil)
     st.markdown("**Auswertung**")
     wertung = st.selectbox("Wertung", list(C.WERTUNG_LABELS), format_func=C.WERTUNG_LABELS.get, key="wertung_select")
@@ -230,7 +230,7 @@ st.markdown(
 | Annahme | Was passiert, wenn sie verletzt ist | Wer setzt an |
 |---|---|---|
 | **Es gibt eine Stärke, die die Partien erklärt** | Mit Spielstilen, die einander kontern, hängt die Leistung am Gegner. Die Tabelle trifft dann die erwartete Siegquote, nicht die Stärke (Experiment 4). | Nicht-Transitivität |
-| **Jeder spielt gegen jeden, gleich oft** | Bei ungleichen Staffeln oder Lücken ordnet die Tabelle über die Teile hinweg wie ein Münzwurf und merkt es nicht (Experimente 2 und 3). | Massey und Colley, Bradley-Terry |
+| **Jeder spielt gegen jeden, gleich oft** | Wenn die Staffeln nie gegeneinander spielen, ordnet die Tabelle über die Staffeln wie ein Münzwurf (Experiment 2); bei Lücken zerfällt der Plan oft in Teile, ohne dass der Widerspruch zum direkten Vergleich es zeigt (Experiment 3). | Massey und Colley, Bradley-Terry |
 | **Eine Partie hat nur Sieg oder Niederlage** | Tore, Remis und Heimvorteil gehen verloren. Reale Turniere haben sie. | Tore, Remis, Heimvorteil |
 | **Die Stärke bleibt gleich** | Form und Alter verändern sie von Partie zu Partie; die Tabelle gewichtet alle Partien gleich. | Elo, WHR und TrueSkill Through Time |
 | **Die Zahl der Siege genügt** | Sie sagt nichts darüber, wie sicher ein Platz ist. Bei einer Partie je Paar steht der Stärkste in weniger als der Hälfte der Läufe vorn (Experiment 1). | Rangintervalle und Shrinkage |
@@ -245,7 +245,8 @@ with st.expander("📐 Mathematische Formulierung"):
         r"""
 **Modell.** Teilnehmer $i = 1, \dots, n$ haben Stärken $s_i$. Eine Partie $i$ gegen $j$ gewinnt $i$ mit
 $P_{ij} = \mathrm{clip}\big(\sigma(s_i - s_j) + K_{ij},\, 0{,}02,\, 0{,}98\big)$, wobei $\sigma$ die logistische Funktion ist und $K_{ij}$ eine
-antisymmetrische Störung über drei Spielstile (Stil $a$ schlägt Stil $a-1$ modulo 3 mit Zuschlag $c$).
+antisymmetrische Störung über drei Spielstile (Stil $a$ schlägt Stil $a-1$ modulo 3 mit Zuschlag $c$). Die Begrenzung auf $[0{,}02;\ 0{,}98]$
+gilt nur bei $c > 0$.
 
 **Tabelle.** Siege $w_i = \sum_j W_{ij}$ oder Siegquote $w_i / g_i$ mit $g_i$ gespielten Partien. Gleichstand: erst die Siege innerhalb der
 Gruppe der Punktgleichen (Direktvergleich), dann das Los.
@@ -255,7 +256,8 @@ also $e$, nicht $s$.
 
 **Kendall-τ.** $\tau = \frac{C - D}{C + D}$ über alle Paare mit verschiedenem Vergleichswert ($C$ gleich, $D$ entgegengesetzt geordnete Paare).
 
-**Zyklische Dreiecke.** Im Mehrheitsturnier ohne Gleichstände gilt $\binom{n}{3} - \sum_i \binom{w_i}{2}$; mit Gleichständen und ungespielten Paaren
+**Zyklische Dreiecke.** Im Mehrheitsturnier ohne Gleichstände gilt $\binom{n}{3} - \sum_i \binom{w_i}{2}$, wobei $w_i$ hier die Zahl der Gegner ist,
+gegen die $i$ in der Mehrheit gewonnen hat (bei einer Partie je Paar die Siegzahl); mit Gleichständen und ungespielten Paaren
 zählt die Demo über $\mathrm{tr}(B^3)/3$ mit der Kantenmatrix $B_{ij} = [W_{ij} > W_{ji}]$.
 
 **Zufall.** SplitMix64-Strom, Ausgang $k$ hängt nur von (Seed, $k$) ab; eine Partie ist „Sieg“, wenn die gleichverteilte Zahl unter $P_{ij}$ liegt.
