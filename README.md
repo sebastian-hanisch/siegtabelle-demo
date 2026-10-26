@@ -14,7 +14,7 @@ fehlen oder die Leistung vom Gegner abhängt, und nichts in der Tabelle verrät 
 
 ## Modell
 
-- n Teilnehmer mit Stärken sᵢ, äquidistant mit Abstand δ (Standard 0,3: der Stärkere gewinnt gegen den nächsten Nachbarn mit etwa 57 %).
+- n Teilnehmer mit Stärken sᵢ, äquidistant mit Abstand δ (Standard 0,3: der Stärkere gewinnt gegen den nächsten Nachbarn mit etwa 57 %, bei 12 Teilnehmern der Erste gegen den Letzten mit etwa 96 %).
 - Eine Partie i gegen j gewinnt i mit P = σ(sᵢ − sⱼ), optional plus eine zyklische Störung über drei Spielstile (Zuschlag c; mit Störung, also c > 0, auf
   0,02 bis 0,98 begrenzt). Beobachtet werden nur Ausgänge, nie die Stärke.
 - **Zwei Zielgrößen:** die Generator-Stärke s und die **erwartete Siegquote** eᵢ gegen ein gleichverteiltes Feld. Ohne Zyklen ordnen beide gleich.
@@ -40,7 +40,7 @@ Platz 1 etwa 2 bis 3,5 Punkte; mit 6000 anderen Seeds lag Experiment 1 bei einer
 | Frage | Befund | Test |
 |---|---|---|
 | Wie gut ist die Tabelle im besten Fall (vollständig, ausgeglichen)? | Mit einer Partie je Paar steht der Stärkste nur in etwa 40 % der Läufe auf Platz 1 (τ = 0,53); mit 4 Partien in etwa 65 % (0,78), mit 10 Partien in rund 75 % (0,88), mit 40 Partien in rund 93 % (0,98). **Reines Rauschen**, kein Verfahrensfehler. | `test_one_game_per_pair_the_strongest_leads_in_less_than_half_of_the_runs`, `test_more_games_help_monotonically_and_forty_games_nearly_fix_it` |
-| Ist die Siege-Ordnung dort schon die Bradley-Terry-Ordnung? | **Ja**, wo der Schätzer existiert (alle auswertbaren Turniere in der Stichprobe). Bei einer Partie je Paar existiert er in rund 40 % der Läufe nicht (ungeschlagene Teilnehmer oder Teilgruppen ohne Rückweg). | `test_wins_order_equals_bradley_terry_order_in_a_balanced_complete_tournament` |
+| Ist die Siege-Ordnung dort schon die Bradley-Terry-Ordnung? | **Ja**, wo der Schätzer existiert (alle auswertbaren Turniere in der Stichprobe). Bei einer Partie je Paar existiert er in den 200 festen Turnieren bei 8 Teilnehmern in 33,5 % der Läufe nicht, bei 12 Teilnehmern in 37 % (ungeschlagene Teilnehmer oder Teilgruppen ohne Rückweg; Kriterium: Gewinngraph nicht stark zusammenhängend). | `test_wins_order_equals_bradley_terry_order_in_a_balanced_complete_tournament`, `test_with_one_game_per_pair_the_bradley_terry_estimator_is_missing_in_a_third_of_the_runs` |
 | Gleichstände | Bei einer Partie je Paar stehen 14 % aller Paare punktgleich, bei 40 Partien 0,2 %. | `test_ties_are_common_with_one_game_and_rare_with_forty` |
 | Zwei Staffeln ohne Kreuzpartien | 50 % der Paare über die Staffeln falsch geordnet (Münzwurf), der Plan hat zwei Teile; die Tabelle weist trotzdem Plätze 1 bis 12 aus. Mit einer Kreuzpartie je starkem Spieler 35 %, mit drei 16,5 %, wenn alle gegeneinander spielen 6 %. | `test_without_crossing_games_the_two_leagues_are_ordered_like_a_coin_flip`, `test_error_falls_with_every_crossing_game_but_never_reaches_zero` |
 | Fehlende Partien | Gewertet nach Siegquote ordnet die Tabelle bei p = 0,5 besser als nach Siegen (τ 0,58 gegen 0,50). Bei p = 0,33 zerfällt der Plan in etwa 14 bis 17 % der Läufe in Teile, bei p = 0,2 in etwa 68 bis 72 % (Stichprobe: 17 % und 72 %; für zufällige Lücken bei 12 Teilnehmern ergibt die Rechnung 14,0 % und 67,7 %). | `test_quote_beats_wins_when_games_are_missing`, `test_sparse_plans_fall_apart_and_the_contradiction_hides_it` |
@@ -90,7 +90,7 @@ Platz 1 etwa 2 bis 3,5 Punkte; mit 6000 anderen Seeds lag Experiment 1 bei einer
 
 ## Tests
 
-133 Tests, rund 80 Sekunden: Einheiten gegen von Hand gerechnete Mini-Instanzen (`test_algorithm.py`), Generator (`test_generator.py`),
+136 Tests, rund 80 Sekunden: Einheiten gegen von Hand gerechnete Mini-Instanzen (`test_algorithm.py`), Generator (`test_generator.py`),
 **Orakel** (`test_oracle_siegtabelle.py`: zyklische Dreiecke gegen Aufzählung, Kendall-τ gegen `scipy`, Komponenten gegen `networkx`,
 Siege-Ordnung gegen Bradley-Terry per `scipy.optimize`, exakte Aufzählung für n = 3, Direktvergleich gegen Aufzählung, erwartete Siegquote),
 Presets, ausblendbare Regler (`test_hidden_widget_state.py`), alle Zahlen dieses README (`test_claims.py`) und AppTest-Rauchtests.

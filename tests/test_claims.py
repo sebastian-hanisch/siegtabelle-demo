@@ -3,11 +3,13 @@ Schwellen mit Abstand zur gemessenen Zahl; SplitMix64 macht die Läufe plattform
 
 import math
 
+import numpy as np
 import pytest
 
 import stb_constants as C
 import stb_evaluation as ev
 import turnier_generator as T
+from stb_scenario import Settings, make_turnier
 
 
 @pytest.fixture(scope="module")
@@ -34,6 +36,12 @@ def test_help_text_nearest_neighbour_win_probability_is_about_57_percent():
     assert 1 / (1 + math.exp(-0.3)) == pytest.approx(0.574, abs=0.001)
 
 
+def test_help_text_first_beats_last_with_about_96_percent_at_twelve_participants():
+    t = make_turnier(Settings(n=12, delta=0.3, k=1, c=0.0, seed=1))
+    assert t.P[11, 0] == pytest.approx(0.964, abs=0.001)             # Erster gegen Letzten, ohne Störung
+    assert t.P[11, 10] == pytest.approx(0.574, abs=0.001)            # Erster gegen den nächsten Nachbarn
+
+
 # --- Experiment 1 ------------------------------------------------------------------------------------------------------------------------
 
 def test_one_game_per_pair_the_strongest_leads_in_less_than_half_of_the_runs(best_case):
@@ -50,6 +58,32 @@ def test_more_games_help_monotonically_and_forty_games_nearly_fix_it(best_case):
 
 def test_ties_are_common_with_one_game_and_rare_with_forty(best_case):
     assert best_case[1]["ties"] > 0.10 and best_case[40]["ties"] < 0.01
+
+
+def _strongly_connected(W) -> bool:
+    """Existenzkriterium des Bradley-Terry-Schätzers (Zermelo, Ford): Der Gewinngraph (i -> j, wenn i mindestens einmal gegen j gewann) ist stark zusammenhängend."""
+    reach = (np.asarray(W) > 0) | np.eye(len(W), dtype=bool)
+    for m in range(len(W)):
+        reach = reach | (reach[:, [m]] & reach[[m], :])
+    return bool(reach.all())
+
+
+def _share_without_estimator(n: int) -> float:
+    runs = [make_turnier(Settings(n=n, delta=0.3, k=1, plan="vollstaendig", seed=s)) for s in C.SWEEP_SEEDS]
+    return sum(not _strongly_connected(t.wins) for t in runs) / len(runs)
+
+
+def test_with_one_game_per_pair_the_bradley_terry_estimator_is_missing_in_a_third_of_the_runs():
+    assert _share_without_estimator(8) == pytest.approx(0.335, abs=0.006)
+    assert _share_without_estimator(12) == pytest.approx(0.37, abs=0.006)
+
+
+def test_strong_connectivity_criterion_agrees_with_networkx():
+    nx = pytest.importorskip("networkx")
+    for s in C.SWEEP_SEEDS[:60]:
+        t = make_turnier(Settings(n=8, delta=0.3, k=1, plan="vollstaendig", seed=s))
+        g = nx.from_numpy_array((t.wins > 0).astype(int), create_using=nx.DiGraph)
+        assert _strongly_connected(t.wins) == nx.is_strongly_connected(g), s
 
 
 # --- Experiment 2 ------------------------------------------------------------------------------------------------------------------------

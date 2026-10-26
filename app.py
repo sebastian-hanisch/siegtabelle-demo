@@ -75,6 +75,21 @@ Weiter unten: vier **🔬 Experimente** mit Verdikt, **🚧 Wo die Annahmen ende
 """
 )
 
+# erklaerseite:einfach:start (erzeugt von tools/set_demo_explainer.py (Website-Repo) aus tools/content/explainers/rangfolge-erklaert.json, nicht von Hand ändern)
+with st.expander("💬 In einfachen Worten"):
+    st.markdown(
+        """
+Stellen Sie sich ein Turnier vor, in dem am Ende nur Siege gezählt werden. Die **Tabelle nach Siegen** ordnet die Teilnehmer nach der Zahl ihrer Siege, bei Gleichstand zuerst nach dem direkten Vergleich, dann nach dem Los. Die Demo spielt ein simuliertes Turnier durch, in dem die wahre Stärke jedes Teilnehmers bekannt ist. So lässt sich messen, wie gut die Tabelle diese Stärke trifft.
+
+Spielt jeder gegen jeden gleich oft, ist die Tabelle fair, aber verrauscht: Der Zufall der Partien verwischt die Stärke. Ungleiche Gegner sind dagegen kein Zufall. Spielen zwei Gruppen nie gegeneinander, ordnet die Tabelle über die Gruppen hinweg wie ein Münzwurf. Fehlen Partien, kann der Spielplan in getrennte Teile zerfallen, und kontern sich Spielstile, rutscht ein Stärkster nach unten. Die Tabelle misst dann den Erfolg gegen das gespielte Feld.
+
+Nichts in der Tabelle verrät das. Auch der Widerspruch zum direkten Vergleich ist kein verlässliches Warnsignal. Die vier Experimente weiter unten zeigen deshalb je einen Fall mit einem Verdikt.
+
+[Ausführlich und verständlich erklärt, mit Fachteil](https://sebastianhanisch.net/rangfolge-erklaert.html)
+        """
+    )
+# erklaerseite:einfach:end
+
 with st.expander("So funktioniert eine Tabelle nach Siegen", expanded=True):
     st.markdown(
         """
@@ -241,6 +256,30 @@ st.markdown(
 st.markdown("---")
 
 with st.expander("📐 Mathematische Formulierung"):
+    # erklaerseite:lesehilfe:start (erzeugt von tools/set_demo_explainer.py (Website-Repo) aus tools/content/explainers/rangfolge-erklaert.json, nicht von Hand ändern)
+    st.markdown(
+        r"""
+**Lesehilfe.** Gegeben sind ein Turnier mit $n$ Teilnehmern, deren Stärken $s_i$ nur die Simulation kennt, und die gespielten Partien. Gesucht ist eine Rangfolge, hier die Tabelle nach Siegen $w_i$ oder nach der Siegquote $w_i / g_i$, und wie gut sie die Stärke $s_i$ bzw. die erwartete Siegquote $e_i$ trifft.
+
+| Symbol | Bedeutung |
+|---|---|
+| $i$, $j$ | Teilnehmer; $i = 1, \dots, n$ |
+| $n$ | Zahl der Teilnehmer |
+| $s_i$ | Stärke von Teilnehmer $i$ (vom Generator vorgegeben, kein Messwert) |
+| $\sigma$ | logistische Funktion: macht aus einem Stärkeunterschied eine Siegwahrscheinlichkeit |
+| $P_{ij}$ | Wahrscheinlichkeit, dass $i$ gegen $j$ gewinnt |
+| $K_{ij}$, $c$ | Störung durch die drei Spielstile, die einander kontern, und ihr Zuschlag (Zyklenstärke); $c = 0$ heißt keine Zyklen |
+| $W_{ij}$ | Zahl der Siege von $i$ gegen $j$ |
+| $w_i$, $g_i$ | Siege bzw. gespielte Partien von $i$ |
+| $k$ | Partien je Paar |
+| $e_i$ | erwartete Siegquote von $i$ gegen ein gleichverteiltes Feld |
+| $\tau$, $C$, $D$ | Kendall-τ; Zahl der gleich bzw. entgegengesetzt geordneten Paare |
+| $B_{ij}$ | Kantenmatrix des Mehrheitsturniers: 1, wenn $i$ gegen $j$ mehr Partien gewann als $j$ gegen $i$ |
+
+[Schritt für Schritt erklärt, mit Herleitung und Literatur](https://sebastianhanisch.net/rangfolge-erklaert.html#fachleute)
+        """
+    )
+    # erklaerseite:lesehilfe:end
     st.markdown(
         r"""
 **Modell.** Teilnehmer $i = 1, \dots, n$ haben Stärken $s_i$. Eine Partie $i$ gegen $j$ gewinnt $i$ mit
